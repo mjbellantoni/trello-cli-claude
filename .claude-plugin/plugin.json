@@ -1,0 +1,12 @@
+{
+  "name": "trello-cli-claude",
+  "description": "Claude plugin for trello-cli",
+  "version": "1.0.0",
+  "author": {
+    "name": "Matthew Bellantoni"
+  },
+  "repository": "https://github.com/mjbellantoni/trello-cli-claude",
+  "homepage": "https://github.com/mjbellantoni/trello-cli-claude",
+  "license": "MIT",
+  "keywords": ["trello", "task-management", "bug-tracking", "cli"]
+}
