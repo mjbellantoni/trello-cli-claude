@@ -1,5 +1,5 @@
 {
-  "name": "trello-cli-claude",
+  "name": "trello-cli",
   "description": "Claude plugin for trello-cli",
   "version": "1.0.0",
   "author": {
