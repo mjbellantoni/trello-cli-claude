@@ -89,27 +89,29 @@ Keep it short — one line per blocked item.
 
 ### Phase 6: Create Child Card
 
-Build the child card description with metadata block:
+Build the child card description. Goal and Note go first (the actionable content), then a `---` separator, then the Lineage metadata section:
 
 ```
----
-parent_card: <parent card URL>
-parent_slug: <slug>
-parent_checklist_name: Steps
-parent_item_number: <NN>
-requires_migrations: <true|false>
-deps: <comma-separated list or empty>
+**🎯 Goal:** <step title from checklist item>
+
+**📝 Note:** Parent card has full context; refer there.
+
 ---
 
-Goal: <step title from checklist item>
-Notes: parent card has full context; refer there.
+### 🔗 Lineage
+
+- **Parent:** [<parent card title>](<parent card URL>)
+- **Checklist:** <checklist name> · **Item:** <NN>
+- **Migrations:** <yes|no> · **Deps:** <comma-separated list or "none">
 ```
+
+The parent link MUST be a Markdown link `[title](url)` — do NOT use a naked URL.
 
 Create the card:
 
 ```bash
 bin/trello card new "[<slug>.<NN>] <step title>" \
-  --description "<metadata block + goal>" \
+  --description "<description from template above>" \
   --list "In Progress"
 ```
 
