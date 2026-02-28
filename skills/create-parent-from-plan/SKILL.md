@@ -12,7 +12,7 @@ Create a parent Trello card with a numbered checklist of steps. The parent stays
 ## Conventions
 
 - **Parent title:** `[<slug>] <title>` — slug is lowercase alphanumeric + hyphens
-- **Checklist items:** Numbered `01.` `02.` `03.` etc.
+- **Checklist items:** Prefixed with slug and number: `[slug.01]` `[slug.02]` `[slug.03]` etc.
 - **Deps syntax:** Append `{deps:01,02}` to items that depend on earlier steps
 - **Migrations syntax:** Append `{migrations}` to items that involve Rails migrations
 
@@ -46,9 +46,9 @@ bin/trello checklist add <card-ref> "Steps"
 For each step, add a numbered checklist item:
 
 ```bash
-bin/trello checklist item-add <card-ref> "Steps" "01. <step title>"
-bin/trello checklist item-add <card-ref> "Steps" "02. <step title> {deps:01}"
-bin/trello checklist item-add <card-ref> "Steps" "03. <step title> {deps:01,02} {migrations}"
+bin/trello checklist item-add <card-ref> "Steps" "[<slug>.01] <step title>"
+bin/trello checklist item-add <card-ref> "Steps" "[<slug>.02] <step title> {deps:01}"
+bin/trello checklist item-add <card-ref> "Steps" "[<slug>.03] <step title> {deps:01,02} {migrations}"
 ```
 
 Number format: always two digits, zero-padded (01, 02, ... 09, 10, 11, ...).
@@ -65,8 +65,8 @@ If you catch yourself doing these, STOP:
 
 - **Creating child cards** — This skill only creates the parent. Children are created lazily by start-next-child.
 - **Forgetting the slug brackets** — Title MUST be `[slug] title`, not just `slug title`
-- **Using single-digit numbers** — Always zero-pad: `01` not `1`
-- **Adding items without the number prefix** — Every item starts with `NN.`
+- **Using single-digit numbers** — Always zero-pad: `[slug.01]` not `[slug.1]`
+- **Adding items without the bracket prefix** — Every item starts with `[<slug>.NN]`
 - **Verbose confirmation** — Just the URL, nothing more
 
 ## Quick Reference

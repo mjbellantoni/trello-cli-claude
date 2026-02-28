@@ -15,7 +15,7 @@ Find the next ready checklist item on a parent card, create a child card for it,
 - **Child title format:** `[<slug>.<NN>] <step title>`
 - **Deps:** `{deps:01,02}` — item blocked until those checklist items are checked off
 - **Migrations:** `{migrations}` — only one migration child in flight at a time
-- **Child link:** Appended to checklist item as `→ <child-url>`
+- **Child link:** Description text wrapped as Markdown link: `[description](child-url)`
 
 ## The Process
 
@@ -36,12 +36,12 @@ Parse each checklist item into these fields:
 
 | Field | How to extract |
 |-------|---------------|
-| number | Leading `NN.` (two+ digits before first period) |
-| title | Text after `NN. ` and before any `{...}` tags or `→` link |
+| number | New format: inside `[slug.NN]` bracket prefix. Old format: leading `NN.` before first space. |
+| title | Text between the prefix (`[slug.NN] ` or `NN. `) and any `{...}` tags. If the title is a Markdown link `[text](url)`, extract the text portion. Trim trailing whitespace. |
 | deps | Numbers from `{deps:NN,NN}` tag (accept spaces around commas) |
 | migrations | `true` if `{migrations}` tag present (case-insensitive) |
 | checked | `[x]` prefix in card show output |
-| has_child | `true` if item contains `trello.com/c/` URL or `→` |
+| has_child | `true` if item contains `trello.com/c/` URL |
 
 ### Phase 3: Check Migration Lock
 
@@ -68,7 +68,7 @@ Check the description for `requires_migrations: true`. If found, migrations are 
 
 An item is READY if ALL of:
 1. Not checked
-2. No existing child link (no `→` or trello URL in the item text)
+2. No existing child link (no trello URL in the item text)
 3. All deps are checked off (every number in its `{deps:...}` list corresponds to a checked item)
 4. If `{migrations}` is true: migration lock is clear (Phase 3 found no open migration child)
 
@@ -117,13 +117,18 @@ No need to `card move` separately — `--list "In Progress"` creates it there di
 
 ### Phase 7: Update Parent Checklist Item
 
-Append the child card URL to the checklist item text:
+Wrap the description text in a Markdown link to the child card. The `[slug.NN]` prefix and any `{...}` tags stay unchanged — only the description becomes a link.
+
+**Before:** `[slug.02] Step description {deps:01}`
+**After:**  `[slug.02] [Step description](https://trello.com/c/xyz789) {deps:01}`
 
 ```bash
-bin/trello checklist item-edit <parent-ref> "Steps" "<exact current item text>" "<current item text> → <child-url>"
+bin/trello checklist item-edit <parent-ref> "Steps" "<exact current item text>" "<text with description wrapped as link>"
 ```
 
-**Important:** Use the exact current item text as the ITEM argument (not a position number), since `item-edit` matches by exact name. The NEW_TEXT is the full replacement including the appended link.
+**Important:** Use the exact current item text as the ITEM argument (not a position number), since `item-edit` matches by exact name.
+
+**Old format items:** If the item uses old `NN. title` format, convert it to the new format at the same time: `[slug.NN] [title](url) {tags}`.
 
 ### Phase 8: Confirm
 
@@ -145,11 +150,12 @@ If you catch yourself doing these, STOP:
 
 - **Creating multiple child cards** — Only ONE child per invocation
 - **Creating a child for a checked item** — Checked means done
-- **Creating a duplicate child** — If item already has `→ <url>`, skip it
+- **Creating a duplicate child** — If item already has a Markdown link or trello URL, skip it
 - **Ignoring deps** — Always verify dep items are checked
 - **Ignoring migration lock** — Always check if `{migrations}` items need the lock scan
 - **Guessing list names** — Use exact names: "In Progress", "Done/Committed"
 - **Using position numbers for item-edit** — Use exact item text as the ITEM argument
+- **Appending URL instead of linking** — Wrap the description in `[text](url)`, do NOT append `→ url` or bare URLs
 - **Skipping the metadata block** — Every child MUST have the `---` metadata block in its description
 
 ## Quick Reference
@@ -162,5 +168,5 @@ If you catch yourself doing these, STOP:
 | 4. Ready | (logic) | Filter to actionable items |
 | 5. Pick | (logic) | Smallest NN or blocked report |
 | 6. Create | `bin/trello card new --list "In Progress"` | Child card |
-| 7. Link | `bin/trello checklist item-edit` | Append `→ url` |
+| 7. Link | `bin/trello checklist item-edit` | Wrap description as Markdown link |
 | 8. Confirm | (output) | URL + one sentence |
