@@ -158,7 +158,8 @@ If you catch yourself doing these, STOP:
 - **Guessing list names** — Use exact names: "In Progress", "Done/Committed"
 - **Using position numbers for item-edit** — Use exact item text as the ITEM argument
 - **Appending URL instead of linking** — Wrap the description in `[text](url)`, do NOT append `→ url` or bare URLs
-- **Skipping the metadata block** — Every child MUST have the `---` metadata block in its description
+- **Skipping the Lineage section** — Every child MUST have the `### 🔗 Lineage` section in its description
+- **Using a naked URL for parent** — MUST use Markdown link `[title](url)` format
 
 ## Quick Reference
 
