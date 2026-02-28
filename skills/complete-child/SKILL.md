@@ -17,13 +17,16 @@ Move a child card to the appropriate Done list, then check off the corresponding
 bin/trello card show <child-ref>
 ```
 
-Parse the metadata block from the description (between `---` delimiters):
-- `parent_card` — parent card URL or reference
-- `parent_slug` — the slug
-- `parent_checklist_name` — checklist name (usually "Steps")
-- `parent_item_number` — the NN to check off
+Find the `### 🔗 Lineage` section in the description and parse the bullet list:
 
-**Fallback if no metadata block:** Extract `[slug.NN]` from the child card title using `/^\[(?<slug>[a-z0-9-]+)\.(?<nn>\d{2,})\]/`. Search the description for a trello.com URL as the parent reference. Use "Steps" as default checklist name.
+- **Parent URL:** extract from the Markdown link in the `**Parent:**` bullet — match `[text](url)` and take the `url`
+- **Parent checklist name:** text after `**Checklist:**` up to the `·` separator, trimmed
+- **Parent item number:** text after `**Item:**` on the same line, trimmed
+- **Migrations:** text after `**Migrations:**` up to the `·` separator, trimmed — `yes` or `no`
+
+**Fallback for older cards (YAML frontmatter):** If no `### 🔗 Lineage` section is found, look for a metadata block between `---` delimiters and parse `parent_card`, `parent_slug`, `parent_checklist_name`, `parent_item_number` as key-value pairs.
+
+**Last-resort fallback:** Extract `[slug.NN]` from the child card title using `/^\[(?<slug>[a-z0-9-]+)\.(?<nn>\d{2,})\]/`. Search the description for a trello.com URL as the parent reference. Use "Steps" as default checklist name.
 
 ### Phase 2: Move Child to Done List
 
