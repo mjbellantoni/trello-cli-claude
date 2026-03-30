@@ -100,6 +100,22 @@ Start work on the next ready checklist item:
 4. Links the child back to the parent checklist item
 5. Reports blocked items if nothing is ready
 
+### `/file-findings`
+
+Batch-file code review findings as individual Trello cards:
+
+- "file findings 02 03 04"
+- "create cards for findings"
+
+**What it does:**
+1. Looks up each finding identifier in the current session's review output
+2. Classifies as `bug` (broken behavior now) or `chore` (everything else)
+3. Creates a self-contained card with file paths, code context, and fix direction
+4. Places each card at top of Inbox with the appropriate label
+5. Reports a summary table of card titles and URLs
+
+Each card description is fully self-contained — a new Claude instance with no session history can complete the work from the description alone.
+
 ### `/complete-child`
 
 Complete a child card and update the parent:
