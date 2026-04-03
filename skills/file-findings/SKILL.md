@@ -74,6 +74,49 @@ example code if the review provided it. Not just "fix it" — describe the appro
 
 The description must be **fully self-contained**. A brand new Claude instance with no session history must be able to complete the task from the description alone. Do not reference other findings, review identifiers, review severity labels, or session context.
 
+**Conditional `## Steps` section — append ONLY when work is clearly multi-step and sequential:**
+
+Include when:
+- Refactors in a specific order (extract → update callers → remove old code)
+- Work touching 3+ files where later changes depend on earlier ones
+- Cards where you'd naturally say "first X, then Y, then Z"
+
+Omit when:
+- Single-file changes
+- Dead code removal
+- Bug fixes with one clear change point
+
+When included, append after Fix Direction:
+
+```
+## Steps
+
+Slug: <proposed-slug>
+
+1. <atomic step — narrow enough for a failing test>
+2. <next step> {deps:1}
+3. <final step> {deps:1,2}
+```
+
+- Slug: lowercase alphanumeric + hyphens, derived from the card title
+- Each step must be specific enough that a developer or agent could write a failing test from it alone
+- `{deps:N}` — step can't start until step N is merged
+- `{migrations}` — step involves a Rails migration
+
+Example — multi-step finding produces:
+
+```
+## Steps
+
+Slug: split-draft-finder
+
+1. Move `build_reply_message_from_draft` and `latest_non_draft_message` into `DraftReplyMessage` as class methods
+2. Remove those methods from `DraftFinder` concern, keeping only `find_draft_in_thread` {deps:1}
+3. Update `RepliesController` to call `DraftReplyMessage` directly instead of through the concern {deps:1,2}
+```
+
+Single-file bug fix or dead code removal → no Steps section.
+
 ### Phase 4: Create Cards
 
 For each finding:
@@ -120,6 +163,9 @@ If you catch yourself doing these, STOP:
 - **Asking the user to describe the findings** — You ran the review, you have the context
 - **Forgetting --position top** — Cards go to top of Inbox, always
 - **Forgetting --label** — Every finding card needs bug or chore
+- **Including Steps on single-step cards** — Only multi-step sequential work gets a Steps section. Single fixes, dead code removal, one-file changes don't.
+- **Steps too vague to test** — Each step must be specific enough for a failing test. "Refactor the module" is too vague; "Move X into Y" is testable.
+- **Missing {deps:N} on dependent steps** — If step 3 can't start until step 1 is merged, say so.
 
 ## Quick Reference
 
