@@ -28,6 +28,8 @@ bin/trello card show <parent-ref>
 Extract slug from title — must match `/^\[(?<slug>[a-z0-9-]+)\]/`.
 If no slug found, STOP and tell the user to add a `[slug]` prefix to the card title.
 
+Extract labels from the `Labels:` line in the card show output. Keep only type labels: `bug`, `chore`, `user`, `feature` (case-insensitive match). Save matching labels for Phase 6.
+
 ### Phase 2: Load and Parse Checklist
 
 Find the "Steps" checklist in the card show output. If no checklist named "Steps", use the first (and only) checklist. If multiple checklists and none named "Steps", STOP and ask.
@@ -112,8 +114,11 @@ Create the card:
 ```bash
 bin/trello card new "[<slug>.<NN>] <step title>" \
   --description "<description from template above>" \
-  --list "In Progress"
+  --list "In Progress" \
+  -L "bug" -L "feature"
 ```
+
+Include a `-L` flag for each type label found on the parent in Phase 1 (only `bug`, `chore`, `user`, `feature`). Omit `-L` entirely if the parent had none of those labels.
 
 No need to `card move` separately — `--list "In Progress"` creates it there directly.
 
@@ -165,7 +170,7 @@ If you catch yourself doing these, STOP:
 
 | Phase | Command | Purpose |
 |-------|---------|---------|
-| 1. Fetch | `bin/trello card show` | Get parent details |
+| 1. Fetch | `bin/trello card show` | Get parent details + type labels |
 | 2. Parse | (text parsing) | Extract items, deps, tags |
 | 3. Migration | `bin/trello list cards` + `card show` | Check lock |
 | 4. Ready | (logic) | Filter to actionable items |
