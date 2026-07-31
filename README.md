@@ -159,6 +159,36 @@ Resulting child cards (created one at a time):
 
 Only one migration child may be in flight at a time. A migration child is "in flight" if it exists on **In Progress** or **Done/Committed** (not yet deployed). The lock clears when the card reaches **Done/Deployed**.
 
+## Command Reference
+
+The skills above build on [trello-cli](https://github.com/mjbellantoni/trello-cli). When a task needs something a skill doesn't spell out, use these commands directly (run `bin/trello <group> help <command>` for full options).
+
+### Cards
+
+| Command | Purpose |
+|---------|---------|
+| `card new TITLE [-d DESC] [-l LIST] [-L LABEL...] [-p top\|bottom]` | Create a card |
+| `card show REF` | Show details (title, description, labels, checklists, attachments, comments) |
+| `card move REF LIST [-p top\|bottom\|N]` | Move to a list, optionally at a position |
+| `card update REF [-d DESC] [-t TITLE]` | Edit the description and/or title of an existing card |
+| `card archive REF` / `card unarchive REF` | Archive or restore a card |
+| `card add-label REF LABEL` / `card remove-label REF LABEL` | Add or remove a label |
+
+`card update` renames a card with `-t/--title` and rewrites its description with `-d/--description` (at least one is required). Both editing a card's title and its description are supported — no need to recreate the card.
+
+### Lists, checklists, comments, attachments
+
+| Command | Purpose |
+|---------|---------|
+| `list cards NAME` | List cards in a list |
+| `list archive NAME` / `list unarchive NAME` | Archive or restore a list |
+| `checklist add REF NAME` / `checklist remove REF NAME` / `checklist rename REF NAME NEW_NAME` | Manage checklists |
+| `checklist item-add\|item-check\|item-uncheck\|item-edit\|item-remove REF CHECKLIST ITEM` | Manage checklist items |
+| `comment add REF TEXT` / `comment list REF` | Add or list comments |
+| `attach upload REF FILE` / `attach list REF` / `attach get REF FILENAME` | Manage attachments |
+
+Run `bin/trello tree` for the full command tree.
+
 ## License
 
 MIT
