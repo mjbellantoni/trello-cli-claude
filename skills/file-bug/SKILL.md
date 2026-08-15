@@ -24,6 +24,11 @@ Collect:
 
 ### Phase 2: Format Content
 
+**Title:** a plain sentence describing the defect. No kind prefix — the `bug` label carries the kind.
+
+- Good: `Reply drafts vanish when the thread is archived mid-edit`
+- Bad: `Bug: reply drafts vanish`
+
 **Description template:**
 
 ```
@@ -38,17 +43,33 @@ Collect:
 [What actually happened]
 
 ## Notes
-[Any additional context - file paths, config, etc.]
+[Links and evidence only — see below]
 ```
+
+**Notes holds links and evidence only:** incident URL, PR, card, commit, file path.
+If a Notes line does not change what someone does, cut it. It is not the
+commentary field.
+
+**Hard cap: 200 words for the whole description, Notes included.**
+
+Over the cap means one of two things:
+
+- It is more than one card → split it.
+- The detail belongs in an attached markdown file → attach it and link the attachment from Notes.
 
 **Attachments:**
 - Stack traces > 10 lines → save to temp file, attach as `stacktrace.txt`
 - Screenshots → attach as `screenshot.png`
+- An incident or design document that already exists → attach that file as it is
+
+Stack traces and screenshots are session evidence, so you capture them yourself.
+A prose document is not — attach the one that already exists rather than writing
+one up. Either way, upload only after the file exists.
 
 ### Phase 3: Create Card
 
 ```bash
-bin/trello card new "Bug: <concise title>" \
+bin/trello card new "<plain sentence describing the defect>" \
   --description "<formatted description>" \
   --label bug \
   --position top
@@ -70,6 +91,11 @@ Nothing more. Don't fill context with card details.
 If you catch yourself doing these, STOP:
 
 - **Asking user to describe the bug** - You saw it, you describe it
+- **Prefixing the title with "Bug:"** - The label carries the kind
+- **Using Notes as commentary** - Links and evidence only; cut any line that doesn't change what someone does
+- **Description over 200 words** - Split the card or attach the detail
+- **Writing up a prose document to attach** - Capture stack traces and screenshots; attach existing documents as they are
+- **Uploading a path that doesn't exist** - The attachment must exist before `attach upload`
 - **Including full file contents** - Summarize, don't dump
 - **Forgetting the bug label** - Every bug needs the label
 - **Putting card in wrong place** - Top of Inbox, always
@@ -80,6 +106,6 @@ If you catch yourself doing these, STOP:
 | Phase | Action | Output |
 |-------|--------|--------|
 | 1. Gather | Collect error, steps, expected/actual | Context in memory |
-| 2. Format | Apply template, handle attachments | Description + files |
+| 2. Format | Apply template, ≤200 words, handle attachments | Description + files |
 | 3. Create | Run CLI commands | Card created |
 | 4. Confirm | Report reference | "Filed as #47" |

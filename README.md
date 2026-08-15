@@ -61,9 +61,33 @@ Capture an issue you encountered into a new Trello card:
 
 **What it does:**
 1. Gathers context from the session (error, steps, expected/actual behavior)
-2. Formats a structured bug report
+2. Formats a structured bug report (Steps to Recreate / Expected / Actual / Notes, 200 words max)
 3. Creates card with `bug` label at top of Inbox
 4. Attaches stack traces or screenshots if available
+
+### `/file-feature`
+
+Capture a wanted capability into a new Trello card:
+
+- "file a feature for that"
+- "make a card for this idea"
+
+**What it does:**
+1. Gathers the capability, who wants it, and how you'd know it works
+2. Formats What / Why / Done when / Notes, with required Given-When-Then acceptance (150 words max)
+3. Creates card with `feature` label at top of Inbox
+
+### `/file-chore`
+
+Capture maintenance work — cleanup, upgrades, tech debt, tooling:
+
+- "file a chore"
+- "that's tech debt - make a card"
+
+**What it does:**
+1. Gathers the work, what makes it worth doing now, and the completion condition
+2. Formats What / Why now / Done when / Notes, Gherkin optional (150 words max)
+3. Creates card with `chore` label at top of Inbox
 
 ### `/finish-card`
 
@@ -82,9 +106,12 @@ Set up a parent card with a numbered checklist of steps:
 - "make a parent Trello card with checklist"
 
 **What it does:**
-1. Creates a card with `[slug] title` format on Backlog
-2. Adds plan/context as the description
-3. Creates a "Steps" checklist with numbered items (01, 02, ...)
+1. Resolves the current dated list (`Mmm DD`) via `list all`
+2. Creates a card with `[slug] title` format there
+3. Adds plan/context as the description and attaches the high-level design, if one exists
+4. Creates a "Steps" checklist with numbered items (01, 02, ...)
+
+The checklist is the commitment; child cards are created lazily by `/start-next-child`. The parent moves to **In Progress** when the first child is created, and to **Done/Deployed** when every child is finished. There is no `Backlog` list on this board.
 
 ### `/start-next-child`
 
@@ -180,6 +207,7 @@ The skills above build on [trello-cli](https://github.com/mjbellantoni/trello-cl
 
 | Command | Purpose |
 |---------|---------|
+| `list all` | List every list on the board |
 | `list cards NAME` | List cards in a list |
 | `list archive NAME` / `list unarchive NAME` | Archive or restore a list |
 | `checklist add REF NAME` / `checklist remove REF NAME` / `checklist rename REF NAME NEW_NAME` | Manage checklists |
