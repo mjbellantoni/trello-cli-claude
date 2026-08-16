@@ -21,94 +21,84 @@ Collect:
 3. **Acceptance** - How you would know it works, in observable terms
 4. **Evidence** - Conversation, incident, card, or file that prompted it
 
-### Phase 2: Format Content
+### Phase 2: File the Card
 
-**Title:** a plain sentence describing the capability. No kind prefix — the `feature` label carries the kind.
-
-- Good: `Let reviewers filter the queue by assignee`
-- Bad: `Feature: queue filtering`
-
-**Description template:**
-
-```
-## What
-[The capability, in one or two sentences]
-
-## Why
-[Who wants it and what it unblocks]
-
-## Done when
-Given <context>
-When <action>
-Then <observable outcome>
-
-## Notes
-[Links and evidence only — see below]
+```bash
+bin/trello feature new "<plain sentence describing the capability>" \
+  --what "<the capability, in one or two sentences>" \
+  --why "<who wants it and what it unblocks>" \
+  --done-when "Given <context>" "When <action>" "Then <observable outcome>" \
+  --notes "<links and evidence only>"
 ```
 
-**Gherkin is required.** Every feature card gets at least one Given/When/Then in
-`## Done when`. `Then` must name something observable — a screen state, a
-response, a record, a message. "Then it works" is not an outcome.
+You pass fields; the CLI applies the `feature` label, assembles the headings,
+puts the card at the top of Inbox, and enforces the word cap. Don't build the
+description and don't count words.
+
+- **One `--done-when` flag, several values after it** — or one value with newlines. Repeating the flag does not accumulate: `--done-when "a" --done-when "b"` silently keeps only `b`.
+- `--notes` is optional.
+
+**`Then` must name something observable** — a screen state, a response, a record,
+a message. The CLI only checks that the words Given, When and Then are present;
+it cannot tell whether the outcome can be seen. "Then it works" is not an
+outcome.
 
 **Notes holds links and evidence only:** incident URL, PR, card, commit, file path.
 If a Notes line does not change what someone does, cut it. It is not the
 commentary field.
 
-**Hard cap: 150 words for the whole description, Notes included.**
-
-Over the cap means one of two things:
-
-- It is more than one card → split it.
-- The detail belongs in the design document → attach that file and link it from Notes.
-
 **The design document is not yours to write.** It comes from the design
 conversation that happened upstream — brainstorming, planning, whatever produced
 it — and normally lives in `doc/scratchpad/` or `docs/plans/`. Attach the file
-that already exists, as it is.
+that already exists, as it is:
 
-Do not author a design document to satisfy this step, and do not restate its
-contents in the description. If no such document exists and the card still will
-not fit in 150 words, it is more than one card. Split it.
-
-Split cards go in priority order, lowest first, so the highest lands at the top
-of Inbox. If the split work needs one place to track it, that is the parent-card
-workflow — see create-parent-from-plan. Say so rather than collapsing the split.
-
-### Phase 3: Create Card
-
-```bash
-bin/trello card new "<plain sentence describing the capability>" \
-  --description "<formatted description>" \
-  --label feature \
-  --position top
-```
-
-If attachments exist:
 ```bash
 bin/trello attach upload <card-ref> <file>
 ```
 
-### Phase 4: Confirm
+Do not author a design document to satisfy this step, and do not restate its
+contents in the description. If no such document exists and the card still will
+not fit, it is more than one card. Split it.
+
+### Phase 3: Confirm
 
 Report ONLY: "Filed as #<number> - <short-url>"
 
 Nothing more. Don't fill context with card details.
 
+## When the CLI Refuses the Card
+
+The command exits non-zero and creates nothing — no card, and no HTTP request
+even attempted. Over the cap, the error prints a per-field word breakdown, so
+the oversized field is visible:
+
+```
+Error: feature description is 161 words, over the 150-word cap.
+  what 9 | why 8 | done_when 142 | notes 2
+```
+
+**The remedy is never to trim toward the limit.** Over the cap means one of two
+things:
+
+- It is more than one card → split it. File the splits in priority order, lowest first, so the highest lands at the top of Inbox. If the split work needs one place to track it, that is the parent-card workflow — see create-parent-from-plan. Say so rather than collapsing the split.
+- The detail belongs in the design document → attach that file and link it from Notes.
+
+There is no `--force`, and the caps are deliberately not adjustable from the
+command line. The only override is `TRELLO_FEATURE_WORD_CAP` in `.trello.yml` —
+an operator's decision about the board, not a move you make to get a card
+through.
+
 ## Red Flags
 
 If you catch yourself doing these, STOP:
 
-- **Prefixing the title with "Feature:"** - The label carries the kind
-- **Skipping the Gherkin** - Given/When/Then is required on every feature card
 - **Unobservable `Then`** - "Then it works" or "Then it's faster" can't be checked; name the screen state, response, record, or message
 - **Writing a solution instead of a capability** - What the user can do, not which class you'd add
+- **Rewording to slip under the cap** - Split the card or attach the detail; the cap is not a formatting target
 - **Using Notes as commentary** - Links and evidence only; cut any line that doesn't change what someone does
-- **Description over 150 words** - Split the card or attach the detail
 - **Writing a design document to satisfy the attachment** - Attach what the design conversation produced; if nothing exists, split the card
 - **Restating the attachment in the description** - Link it, don't duplicate it
 - **Uploading a path that doesn't exist** - The attachment must exist before `attach upload`
-- **Forgetting the feature label** - Every feature needs the label
-- **Putting card in wrong place** - Top of Inbox, always
 - **Verbose confirmation** - Just the reference, nothing more
 
 ## Quick Reference
@@ -116,6 +106,5 @@ If you catch yourself doing these, STOP:
 | Phase | Action | Output |
 |-------|--------|--------|
 | 1. Gather | Collect capability, motivation, acceptance | Context in memory |
-| 2. Format | Apply template, Gherkin required, ≤150 words | Description + files |
-| 3. Create | Run CLI commands | Card created |
-| 4. Confirm | Report reference | "Filed as #47" |
+| 2. File | Run `feature new`, upload attachments | Card created |
+| 3. Confirm | Report reference | "Filed as #47" |
