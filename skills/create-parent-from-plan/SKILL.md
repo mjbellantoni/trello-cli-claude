@@ -7,7 +7,7 @@ description: Use when user says "create a parent card for this plan", "make a pa
 
 ## Overview
 
-Create a parent Trello card with a numbered checklist of steps, in the current dated list. Each checklist item becomes a child card later, one at a time, via start-next-child.
+Create a parent Trello card with a numbered checklist of steps, in the list the caller names. Each checklist item becomes a child card later, one at a time, via start-next-child.
 
 **Why the checklist and not a pile of cards:** the checklist is the commitment; the child cards are created lazily. Do not create cards speculatively and do not do design speculatively. A step you have not started yet is a line of text you can rewrite for free — a card you created in advance is a card someone has to read, triage, and eventually close. Write down the whole shape of the work, then build it out one step at a time.
 
@@ -17,7 +17,9 @@ Create a parent Trello card with a numbered checklist of steps, in the current d
 - **Checklist items:** Prefixed with slug and number: `[slug.01]` `[slug.02]` `[slug.03]` etc.
 - **Deps syntax:** Append `{deps:01,02}` to items that depend on earlier steps
 - **Migrations syntax:** Append `{migrations}` to items that involve Rails migrations
-- **Dated lists:** Named `Mmm DD` — e.g. `Aug 15`, `Sep 03`. New work lands in the current one.
+- **Dated lists:** Named `By Mmm DD` — e.g. `By Aug 30`, `By Sep 12`. These are
+  deadlines, not sprint starts, so a dated list is normally in the future. This
+  is context for whoever picks the list, not a rule for this skill to apply.
 
 ## Parent Lifecycle
 
@@ -25,7 +27,7 @@ The parent is not a permanent parking spot — it moves with the work.
 
 | Stage | List | Trigger |
 |-------|------|---------|
-| Created | current dated list (`Mmm DD`) | This skill. Carries the Steps checklist and usually an attached markdown high-level design. |
+| Created | the list the caller named | This skill. Carries the Steps checklist and usually an attached markdown high-level design. |
 | Active | `In Progress` | The first child card is created. From here the parent follows the normal flow. |
 | Finished | `Done/Deployed` | Every checklist item is checked and every child has reached Done/Deployed. |
 
@@ -49,31 +51,36 @@ Collect from the user (ask if not provided):
 3. **plan/context text** — description content (verbatim or lightly formatted)
 4. **steps** — ordered list of step titles, with optional `{deps:...}` and `{migrations}` tags
 5. **high-level design** — a markdown file to attach, if one exists. Most parents have one.
+6. **list** — the list the parent goes in. Take it from the request if the
+   caller named one; otherwise Phase 2 asks.
 
-Do NOT ask for a list name. Phase 2 resolves it.
+### Phase 2: Confirm the Target List
 
-### Phase 2: Resolve the Target Dated List
+If the caller already named a list, use it. You are done — skip to Phase 3.
+
+Otherwise, show them the board and ask:
 
 ```bash
 bin/trello list all
 ```
 
-Dated lists match `Mmm DD` — `Aug 15`, `Sep 3`. Filter the output to those, then
-pick the most recent one at or before today.
+Ask which list the parent goes in. Use the answer verbatim.
 
-**Compare parsed dates, not strings.** `Sep 3` sorts before `Sep 15`
-lexicographically, and `Dec`/`Jan` cross the year boundary. A dated list ahead of
-today is someone planning forward — don't file into it.
+**Do not infer the list.** Not from today's date, not from which list looks
+newest, not from a name that happens to parse as a date. The caller knows where
+the work belongs and you do not; a wrong guess files the parent somewhere nobody
+will look for it. Asking costs one question.
 
-If no dated list exists, STOP and ask the user which list to use. Do not create
-a list and do not invent a name.
+Do not create a list and do not invent a name. If the caller names a list that
+does not exist, `card new` in Phase 3 will fail — report that and ask again
+rather than substituting a list you think they meant.
 
 ### Phase 3: Create the Card
 
 ```bash
 bin/trello card new "[<slug>] <title>" \
   --description "<plan/context text>" \
-  --list "<dated list from Phase 2>"
+  --list "<list from Phase 2>"
 ```
 
 Capture the card URL from output (line starting with "Created:").
@@ -114,19 +121,17 @@ Number format: always two digits, zero-padded (01, 02, ... 09, 10, 11, ...).
 
 Report ONLY: the card URL and the list it landed in.
 
-Example: `Created [owner-data] parent in Aug 15: https://trello.com/c/abc123XY`
+Example: `Created [owner-data] parent in By Aug 30: https://trello.com/c/abc123XY`
 
 ## Red Flags
 
 If you catch yourself doing these, STOP:
 
-- **Using `Backlog`** — That list does not exist on this board. The parent goes in the current dated list.
+- **Using `Backlog`** — That list does not exist on this board.
 - **Creating child cards** — This skill only creates the parent. Children are created lazily by start-next-child.
 - **Designing steps you haven't committed to** — Steps are titles, not specs. The design work happens when the child card is started.
-- **Guessing the dated list name** — Read them with `list all`. If none exist, ask.
-- **Sorting dated lists as strings** — `Sep 3` vs `Sep 15` and Dec→Jan both break. Parse the dates.
-- **Filing into a future dated list** — Most recent at or before today, not the last one on the board.
-- **Creating a dated list** — If none exist, ask the user. Don't invent board structure.
+- **Picking the list yourself** — Ask. Date arithmetic on list names is how this skill filed work into the wrong place; there is no rule to apply and no date to parse.
+- **Creating a list** — Ask the user. Don't invent board structure.
 - **Forgetting the slug brackets** — Title MUST be `[slug] title`, not just `slug title`
 - **Using single-digit numbers** — Always zero-pad: `[slug.01]` not `[slug.1]`
 - **Adding items without the bracket prefix** — Every item starts with `[<slug>.NN]`
@@ -137,9 +142,9 @@ If you catch yourself doing these, STOP:
 
 | Phase | Command | Purpose |
 |-------|---------|---------|
-| 1. Gather | (conversation) | Get slug, title, plan, steps, design doc |
-| 2. Resolve list | `bin/trello list all` | Newest `Mmm DD` list at or before today |
-| 3. Create | `bin/trello card new --list "<dated list>"` | Parent card |
+| 1. Gather | (conversation) | Get slug, title, plan, steps, design doc, list |
+| 2. Confirm list | `bin/trello list all` | Only if the caller did not name one — then ask |
+| 3. Create | `bin/trello card new --list "<list>"` | Parent card |
 | 4. Attach | `bin/trello attach upload` | High-level design markdown |
 | 5. Steps | `bin/trello checklist add` + `item-add` | Numbered checklist |
 | 6. Confirm | (output) | Card URL + list |
