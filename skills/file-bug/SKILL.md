@@ -37,7 +37,7 @@ the card at the top of Inbox, and enforces the word cap. Don't build the
 description and don't count words.
 
 - **Don't number the steps.** `--steps` numbers them; a leading `1.` you type is stripped.
-- **One `--steps` flag, several values after it** — or one value with newlines. Repeating the flag does not accumulate: `--steps "a" --steps "b"` silently keeps only `b`.
+- **One `--steps` flag, several values after it** — or one value with newlines. This form works on every CLI version. As of trello-cli 2.9.0 repeating the flag (`--steps "a" --steps "b"`) accumulates too, but older versions keep only the last value, so stay with the single-flag form.
 - `--notes` is optional.
 
 **Notes holds links and evidence only:** incident URL, PR, card, commit, file path.

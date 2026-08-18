@@ -37,7 +37,7 @@ You pass fields; the CLI applies the `chore` label, assembles the headings, puts
 the card at the top of Inbox, and enforces the word cap. Don't build the
 description and don't count words.
 
-- **One `--done-when` flag, several values after it** — or one value with newlines. Repeating the flag does not accumulate: `--done-when "a" --done-when "b"` silently keeps only `b`.
+- **One `--done-when` flag, several values after it** — or one value with newlines. This form works on every CLI version. As of trello-cli 2.9.0 repeating the flag (`--done-when "a" --done-when "b"`) accumulates too, but older versions keep only the last value, so stay with the single-flag form.
 - `--notes` is optional.
 
 **"Why now" must survive the question "what if we never did this?"** If the honest
