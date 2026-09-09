@@ -130,6 +130,21 @@ bin/trello card new "<actionable title>" \
 
 `--position top` and `--label` are REQUIRED on every card. No exceptions.
 
+**Formatting the card text.** Trello does not render Markdown tables — the pipes and dashes
+show up as literal text. It does render headings, bold, nested bullet lists,
+links, inline code, fenced code blocks, blockquotes and horizontal rules.
+
+When the content has repeated fields, first decide whether it is really tabular:
+the same fields repeating across three or more items, where a reader would
+compare down a column. Two items, or items whose fields differ, are prose or a
+plain bullet list.
+
+When it is genuinely tabular, use one of these three forms:
+
+- **Two fields per item** → bullet list with a bold key: `- **PostgreSQL 14** — end of life November 2026`
+- **Three or more fields per item** → plain-text columns inside a fenced code block. Alignment survives; bold and links do not work inside.
+- **Over eight items, or reference material** → attach the source file and leave a one-line pointer in the text.
+
 If the finding includes a code snippet longer than 15 lines, save it to a temp file and attach it:
 
 ```bash
@@ -138,7 +153,8 @@ bin/trello attach upload <card-ref> <temp-file>
 
 ### Phase 5: Report
 
-After all cards are created, report a summary table:
+After all cards are created, report a summary table. This is terminal output
+for the user, not card text, so it is a real Markdown table:
 
 ```
 | # | Title | Label | URL |
@@ -153,6 +169,7 @@ Nothing more. Don't rehash the findings.
 
 If you catch yourself doing these, STOP:
 
+- **Writing a Markdown table** — Trello renders the pipes literally. Check the content is really tabular, then use the form that fits it.
 - **Putting "Bug:" or "Chore:" in the title** — The label carries the type
 - **Using review identifiers in the title or description** — MOD-03, F-07, P-12, etc. have no meaning outside this session
 - **Using review severity as a label** — `--label warning` and `--label error` are wrong. Only `bug` and `chore` exist.

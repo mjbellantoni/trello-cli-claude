@@ -186,6 +186,28 @@ Resulting child cards (created one at a time):
 
 Only one migration child may be in flight at a time. A migration child is "in flight" if it exists on **In Progress** or **Done/Committed** (not yet deployed). The lock clears when the card reaches **Done/Deployed**.
 
+## Trello Markdown
+
+Trello renders headings, bold and italic, nested bullet and numbered lists,
+links, inline code, fenced code blocks, blockquotes and horizontal rules. **It
+does not render Markdown tables** — the pipes and dashes show up as literal
+text, and there is no raw HTML fallback.
+
+The filing skills therefore carry a formatting rule for anything they write into
+a card. Before reformatting a table, they check whether the content is really
+tabular: the same fields repeating across three or more items, where a reader
+would compare down a column. Two items, or items whose fields differ, are prose
+or a plain bullet list. When it is genuinely tabular:
+
+| Shape | Form |
+|-------|------|
+| Two fields per item | Bullet list with a bold key: `- **PostgreSQL 14** — end of life November 2026` |
+| Three or more fields per item | Plain-text columns inside a fenced code block. Alignment survives; bold and links do not work inside. |
+| Over ~8 items, or reference material | Attach the source file, leave a one-line pointer in the text |
+
+Tables in this README and in the `SKILL.md` files are documentation for you and
+for the agent. They never reach Trello, so they stay as tables.
+
 ## Command Reference
 
 The skills above build on [trello-cli](https://github.com/mjbellantoni/trello-cli). When a task needs something a skill doesn't spell out, use these commands directly (run `bin/trello <group> help <command>` for full options).

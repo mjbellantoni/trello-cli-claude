@@ -85,6 +85,21 @@ bin/trello card new "[<slug>] <title>" \
 
 Capture the card URL from output (line starting with "Created:").
 
+**Formatting the card text.** Trello does not render Markdown tables — the pipes and dashes
+show up as literal text. It does render headings, bold, nested bullet lists,
+links, inline code, fenced code blocks, blockquotes and horizontal rules.
+
+When the content has repeated fields, first decide whether it is really tabular:
+the same fields repeating across three or more items, where a reader would
+compare down a column. Two items, or items whose fields differ, are prose or a
+plain bullet list.
+
+When it is genuinely tabular, use one of these three forms:
+
+- **Two fields per item** → bullet list with a bold key: `- **PostgreSQL 14** — end of life November 2026`
+- **Three or more fields per item** → plain-text columns inside a fenced code block. Alignment survives; bold and links do not work inside.
+- **Over eight items, or reference material** → attach the source file and leave a one-line pointer in the text.
+
 ### Phase 4: Attach the High-Level Design
 
 If a design document exists:
@@ -127,6 +142,7 @@ Example: `Created [owner-data] parent in By Aug 30: https://trello.com/c/abc123X
 
 If you catch yourself doing these, STOP:
 
+- **Writing a Markdown table** — Trello renders the pipes literally. Check the content is really tabular, then use the form that fits it.
 - **Using `Backlog`** — That list does not exist on this board.
 - **Creating child cards** — This skill only creates the parent. Children are created lazily by start-next-child.
 - **Designing steps you haven't committed to** — Steps are titles, not specs. The design work happens when the child card is started.
