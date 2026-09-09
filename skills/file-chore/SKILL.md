@@ -40,6 +40,21 @@ description and don't count words.
 - **One `--done-when` flag, several values after it** — or one value with newlines. This form works on every CLI version. As of trello-cli 2.9.0 repeating the flag (`--done-when "a" --done-when "b"`) accumulates too, but older versions keep only the last value, so stay with the single-flag form.
 - `--notes` is optional.
 
+**Formatting the card text.** Trello does not render Markdown tables — the pipes and dashes
+show up as literal text. It does render headings, bold, nested bullet lists,
+links, inline code, fenced code blocks, blockquotes and horizontal rules.
+
+When the content has repeated fields, first decide whether it is really tabular:
+the same fields repeating across three or more items, where a reader would
+compare down a column. Two items, or items whose fields differ, are prose or a
+plain bullet list.
+
+When it is genuinely tabular, use one of these three forms:
+
+- **Two fields per item** → bullet list with a bold key: `- **PostgreSQL 14** — end of life November 2026`
+- **Three or more fields per item** → plain-text columns inside a fenced code block. Alignment survives; bold and links do not work inside.
+- **Over eight items, or reference material** → attach the source file and leave a one-line pointer in the text.
+
 **"Why now" must survive the question "what if we never did this?"** If the honest
 answer is "nothing changes", don't file the card.
 
@@ -95,6 +110,7 @@ operator's decision about the board, not a move you make to get a card through.
 
 If you catch yourself doing these, STOP:
 
+- **Writing a Markdown table** — Trello renders the pipes literally. Check the content is really tabular, then use the form that fits it.
 - **Filing a bug as a chore** - If it causes wrong behavior today, use file-bug and the `bug` label
 - **"Why now" that restates "What"** - "Because the table is unused" is not a reason to act now
 - **Unverifiable "Done when"** - "Code is cleaner" can't be checked; name what an observer would see

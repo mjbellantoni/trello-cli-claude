@@ -40,6 +40,21 @@ description and don't count words.
 - **One `--steps` flag, several values after it** — or one value with newlines. This form works on every CLI version. As of trello-cli 2.9.0 repeating the flag (`--steps "a" --steps "b"`) accumulates too, but older versions keep only the last value, so stay with the single-flag form.
 - `--notes` is optional.
 
+**Formatting the card text.** Trello does not render Markdown tables — the pipes and dashes
+show up as literal text. It does render headings, bold, nested bullet lists,
+links, inline code, fenced code blocks, blockquotes and horizontal rules.
+
+When the content has repeated fields, first decide whether it is really tabular:
+the same fields repeating across three or more items, where a reader would
+compare down a column. Two items, or items whose fields differ, are prose or a
+plain bullet list.
+
+When it is genuinely tabular, use one of these three forms:
+
+- **Two fields per item** → bullet list with a bold key: `- **PostgreSQL 14** — end of life November 2026`
+- **Three or more fields per item** → plain-text columns inside a fenced code block. Alignment survives; bold and links do not work inside.
+- **Over eight items, or reference material** → attach the source file and leave a one-line pointer in the text.
+
 **Notes holds links and evidence only:** incident URL, PR, card, commit, file path.
 If a Notes line does not change what someone does, cut it. It is not the
 commentary field.
@@ -88,6 +103,7 @@ operator's decision about the board, not a move you make to get a card through.
 
 If you catch yourself doing these, STOP:
 
+- **Writing a Markdown table** — Trello renders the pipes literally. Check the content is really tabular, then use the form that fits it.
 - **Asking user to describe the bug** - You saw it, you describe it
 - **Rewording to slip under the cap** - Split the card or attach the detail; the cap is not a formatting target
 - **Using Notes as commentary** - Links and evidence only; cut any line that doesn't change what someone does
