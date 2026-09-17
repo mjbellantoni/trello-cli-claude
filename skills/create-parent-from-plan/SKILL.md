@@ -27,19 +27,23 @@ Create a parent Trello card with a numbered checklist of steps, in the list the 
 
 ## Parent Lifecycle
 
-The parent is not a permanent parking spot — it moves with the work.
+The parent holds its place while the work runs. Only the child in hand moves.
 
 | Stage | List | Trigger |
 |-------|------|---------|
 | Created | the list the caller named | This skill. Carries the Steps checklist and usually an attached markdown high-level design. |
-| Active | `In Progress` | The first child card is created. From here the parent follows the normal flow. |
+| Active | the same list | Children are created and worked one at a time. The parent does not move. |
 | Finished | `Done/Deployed` | Every checklist item is checked and every child has reached Done/Deployed. |
 
-The moves after creation are not this skill's job — they happen as children are
-started and completed:
+**Why it stays put.** A dated list is a forecast of what ships by that date, and
+its size is how the board's owner gauges how much work fits. Moving the parent
+into `In Progress` takes it out of that forecast on the day its first child
+starts, which is exactly when the forecast matters most. Only the child in hand
+belongs in `In Progress`.
+
+The parent makes one move, at the end, and it is not this skill's job:
 
 ```bash
-bin/trello card move <parent-ref> "In Progress"
 bin/trello card move <parent-ref> "Done/Deployed"
 ```
 
@@ -157,7 +161,7 @@ If you catch yourself doing these, STOP:
 - **Forgetting the slug brackets** — Title MUST be `[slug] title`, not just `slug title`
 - **Using single-digit numbers** — Always zero-pad: `[slug.01]` not `[slug.1]`
 - **Adding items without the bracket prefix** — Every item starts with `[<slug>.NN]`
-- **Moving the parent yourself** — It moves to In Progress when the first child is created, not now
+- **Moving the parent yourself** — It stays in the list the caller named until every child is done. Nothing moves it in between.
 - **Verbose confirmation** — Just the URL and list, nothing more
 
 ## Quick Reference
