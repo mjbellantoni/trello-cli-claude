@@ -15,6 +15,7 @@ Find the next ready checklist item on a parent card, create a child card for it,
 - **Child title format:** `[<slug>.<NN>] <step title>`
 - **Deps:** `{deps:01,02}` — item blocked until those checklist items are checked off
 - **Migrations:** `{migrations}` — only one migration child in flight at a time
+- **Step type:** `{research}`, `{prototype}` or `{grilling}` — the step's output is an answer, not shipped code. Untagged means implementation.
 - **Child link:** Description text wrapped as Markdown link: `[description](child-url)`
 
 ## The Process
@@ -42,6 +43,7 @@ Parse each checklist item into these fields:
 | title | Text between the prefix (`[slug.NN] ` or `NN. `) and any `{...}` tags. If the title is a Markdown link `[text](url)`, extract the text portion. Trim trailing whitespace. |
 | deps | Numbers from `{deps:NN,NN}` tag (accept spaces around commas) |
 | migrations | `true` if `{migrations}` tag present (case-insensitive) |
+| step_type | `research`, `prototype` or `grilling` from a bare tag of that name (case-insensitive). `implementation` when no such tag is present. |
 | checked | `[x]` prefix in card show output |
 | has_child | `true` if item contains `trello.com/c/` URL |
 
@@ -105,6 +107,7 @@ Build the child card description. Goal and Note go first (the actionable content
 - **Parent:** [<parent card title>](<parent card URL>)
 - **Checklist:** <checklist name> · **Item:** <NN>
 - **Migrations:** <yes|no> · **Deps:** <comma-separated list or "none">
+- **Step type:** <research|prototype|grilling|implementation>
 ```
 
 The parent link MUST be a Markdown link `[title](url)` — do NOT use a naked URL.

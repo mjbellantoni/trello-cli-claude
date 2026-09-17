@@ -17,6 +17,10 @@ Create a parent Trello card with a numbered checklist of steps, in the list the 
 - **Checklist items:** Prefixed with slug and number: `[slug.01]` `[slug.02]` `[slug.03]` etc.
 - **Deps syntax:** Append `{deps:01,02}` to items that depend on earlier steps
 - **Migrations syntax:** Append `{migrations}` to items that involve Rails migrations
+- **Step type syntax:** Append `{research}`, `{prototype}` or `{grilling}` to a
+  step whose output is an answer rather than shipped code. `{research}` gathers
+  facts, `{prototype}` builds something throwaway to test a design, and
+  `{grilling}` puts questions to a person. An untagged step is implementation.
 - **Dated lists:** Named `By Mmm DD` — e.g. `By Aug 30`, `By Sep 12`. These are
   deadlines, not sprint starts, so a dated list is normally in the future. This
   is context for whoever picks the list, not a rule for this skill to apply.
@@ -49,7 +53,7 @@ Collect from the user (ask if not provided):
 1. **slug** — short identifier, e.g. `owner-data` (must match `[a-z0-9-]+`)
 2. **title** — human-readable title
 3. **plan/context text** — description content (verbatim or lightly formatted)
-4. **steps** — ordered list of step titles, with optional `{deps:...}` and `{migrations}` tags
+4. **steps** — ordered list of step titles, with optional `{deps:...}`, `{migrations}` and step-type tags
 5. **high-level design** — a markdown file to attach, if one exists. Most parents have one.
 6. **list** — the list the parent goes in. Take it from the request if the
    caller named one; otherwise Phase 2 asks.
@@ -128,6 +132,7 @@ For each step, add a numbered checklist item:
 bin/trello checklist item-add <card-ref> "Steps" "[<slug>.01] <step title>"
 bin/trello checklist item-add <card-ref> "Steps" "[<slug>.02] <step title> {deps:01}"
 bin/trello checklist item-add <card-ref> "Steps" "[<slug>.03] <step title> {deps:01,02} {migrations}"
+bin/trello checklist item-add <card-ref> "Steps" "[<slug>.04] <step title> {grilling}"
 ```
 
 Number format: always two digits, zero-padded (01, 02, ... 09, 10, 11, ...).
@@ -146,6 +151,7 @@ If you catch yourself doing these, STOP:
 - **Using `Backlog`** — That list does not exist on this board.
 - **Creating child cards** — This skill only creates the parent. Children are created lazily by start-next-child.
 - **Designing steps you haven't committed to** — Steps are titles, not specs. The design work happens when the child card is started.
+- **Inventing a step type** — `{research}`, `{prototype}` and `{grilling}` are the whole set. A step that fits none of them is implementation, so leave it untagged.
 - **Picking the list yourself** — Ask. Date arithmetic on list names is how this skill filed work into the wrong place; there is no rule to apply and no date to parse.
 - **Creating a list** — Ask the user. Don't invent board structure.
 - **Forgetting the slug brackets** — Title MUST be `[slug] title`, not just `slug title`
