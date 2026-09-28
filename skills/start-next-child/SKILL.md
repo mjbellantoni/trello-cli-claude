@@ -58,8 +58,11 @@ Scan for open migration children across these lists:
 
 ```bash
 bin/trello list cards "In Progress"
+bin/trello list cards "Pull Request"
 bin/trello list cards "Done/Committed"
 ```
+
+Skip a list the board does not have.
 
 For each card in the output whose title matches `/^\[[a-z0-9-]+\.\d{2,}\]/` (child card pattern):
 
@@ -176,7 +179,7 @@ If you catch yourself doing these, STOP:
 - **Creating a duplicate child** — If item already has a Markdown link or trello URL, skip it
 - **Ignoring deps** — Always verify dep items are checked
 - **Ignoring migration lock** — Always check if `{migrations}` items need the lock scan
-- **Guessing list names** — Use exact names: "In Progress", "Done/Committed"
+- **Guessing list names** — Use exact names: "In Progress", "Pull Request", "Done/Committed"
 - **Using position numbers for item-edit** — Use exact item text as the ITEM argument
 - **Appending URL instead of linking** — Wrap the description in `[text](url)`, do NOT append `→ url` or bare URLs
 - **Using `card new`** — Create the child with `bin/trello <kind> new`, where the kind comes from the parent's label
