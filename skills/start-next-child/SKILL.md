@@ -29,7 +29,10 @@ bin/trello card show <parent-ref>
 Extract slug from title — must match `/^\[(?<slug>[a-z0-9-]+)\]/`.
 If no slug found, STOP and tell the user to add a `[slug]` prefix to the card title.
 
-Extract labels from the `Labels:` line in the card show output. Keep only type labels: `bug`, `chore`, `user`, `feature` (case-insensitive match). Save matching labels for Phase 6.
+Extract labels from the `Labels:` line in the card show output (case-insensitive match). Save these for Phase 6:
+
+- **Kind:** the one label out of `bug`, `feature`, `chore`. If the parent has none of them, or more than one, STOP and ask which kind the children take.
+- **Origin:** `user`, if present.
 
 ### Phase 2: Load and Parse Checklist
 
@@ -93,17 +96,25 @@ Keep it short — one line per blocked item.
 
 ### Phase 6: Create Child Card
 
-Build the child card description. Goal and Note go first (the actionable content), then a `---` separator, then the Lineage metadata section:
+Create the child with the command for the parent's kind: `bin/trello chore new`, `feature new` or `bug new`. These commands require the kind's sections and enforce its word cap. Never use `card new`, which skips both.
+
+Fill the sections from the step's entry in the parent's plan. The plan is the parent's description or its attached markdown design (`bin/trello attach list <parent-ref>`, then `bin/trello attach get`). Keep each section to this one step. The parent carries the full context.
+
+| Kind | Section | Content |
+|------|---------|---------|
+| `chore` | `--what` | The step's work, in one or two sentences |
+| `chore` | `--why-now` | "Step <NN> of [<slug>]." plus what the step unblocks |
+| `chore` | `--done-when` | One observable condition per value |
+| `feature` | `--what` | The step's capability, in one or two sentences |
+| `feature` | `--why` | "Step <NN> of [<slug>]." plus who wants it |
+| `feature` | `--done-when` | One Given/When/Then per value |
+| `bug` | `--steps` | The parent's steps to recreate, narrowed to this step |
+| `bug` | `--expected` | What this step makes true |
+| `bug` | `--actual` | What happens before this step |
+
+The lineage goes in `--notes`, as this bullet list with no heading:
 
 ```
-**🎯 Goal:** <step title from checklist item>
-
-**📝 Note:** Parent card has full context; refer there.
-
----
-
-### 🔗 Lineage
-
 - **Parent:** [<parent card title>](<parent card URL>)
 - **Checklist:** <checklist name> · **Item:** <NN>
 - **Migrations:** <yes|no> · **Deps:** <comma-separated list or "none">
@@ -112,16 +123,18 @@ Build the child card description. Goal and Note go first (the actionable content
 
 The parent link MUST be a Markdown link `[title](url)` — do NOT use a naked URL.
 
-Create the card:
-
 ```bash
-bin/trello card new "[<slug>.<NN>] <step title>" \
-  --description "<description from template above>" \
-  --list "In Progress" \
-  -L "bug" -L "feature"
+bin/trello chore new "[<slug>.<NN>] <step title>" \
+  --what "<what>" \
+  --why-now "<why now>" \
+  --done-when "<condition>" "<condition>" \
+  --notes "<lineage bullets>" \
+  --list "In Progress"
 ```
 
-Include a `-L` flag for each type label found on the parent in Phase 1 (only `bug`, `chore`, `user`, `feature`). Omit `-L` entirely if the parent had none of those labels.
+Add `--label user` when the parent carries `user`.
+
+If the command rejects the input as over the word cap, do not reword to fit. The step is too big for one card. STOP and tell the user.
 
 No need to `card move` separately — `--list "In Progress"` creates it there directly.
 
@@ -166,18 +179,19 @@ If you catch yourself doing these, STOP:
 - **Guessing list names** — Use exact names: "In Progress", "Done/Committed"
 - **Using position numbers for item-edit** — Use exact item text as the ITEM argument
 - **Appending URL instead of linking** — Wrap the description in `[text](url)`, do NOT append `→ url` or bare URLs
-- **Skipping the Lineage section** — Every child MUST have the `### 🔗 Lineage` section in its description
+- **Using `card new`** — Create the child with `bin/trello <kind> new`, where the kind comes from the parent's label
+- **Skipping the lineage** — Every child MUST carry the lineage bullets in its Notes
 - **Using a naked URL for parent** — MUST use Markdown link `[title](url)` format
 
 ## Quick Reference
 
 | Phase | Command | Purpose |
 |-------|---------|---------|
-| 1. Fetch | `bin/trello card show` | Get parent details + type labels |
+| 1. Fetch | `bin/trello card show` | Get parent details, kind and origin labels |
 | 2. Parse | (text parsing) | Extract items, deps, tags |
 | 3. Migration | `bin/trello list cards` + `card show` | Check lock |
 | 4. Ready | (logic) | Filter to actionable items |
 | 5. Pick | (logic) | Smallest NN or blocked report |
-| 6. Create | `bin/trello card new --list "In Progress"` | Child card |
+| 6. Create | `bin/trello <kind> new --list "In Progress"` | Child card, lineage in Notes |
 | 7. Link | `bin/trello checklist item-edit` | Wrap description as Markdown link |
 | 8. Confirm | (output) | URL + one sentence |

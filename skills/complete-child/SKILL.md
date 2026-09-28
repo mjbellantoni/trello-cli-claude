@@ -17,14 +17,14 @@ Move a child card to the appropriate Done list, then check off the corresponding
 bin/trello card show <child-ref>
 ```
 
-Find the `### 🔗 Lineage` section in the description and parse the bullet list:
+Find the lineage bullets in the description. Newer cards carry them under `## Notes`. Older cards carry them under a `### 🔗 Lineage` heading. Parse the bullet list:
 
 - **Parent URL:** extract from the Markdown link in the `**Parent:**` bullet — match `[text](url)` and take the `url`
 - **Parent checklist name:** text after `**Checklist:**` up to the `·` separator, trimmed
 - **Parent item number:** text after `**Item:**` on the same line, trimmed
 - **Migrations:** text after `**Migrations:**` up to the `·` separator, trimmed — `yes` or `no`
 
-**Fallback for older cards (YAML frontmatter):** If no `### 🔗 Lineage` section is found, look for a metadata block between `---` delimiters and parse `parent_card`, `parent_slug`, `parent_checklist_name`, `parent_item_number` as key-value pairs.
+**Fallback for older cards (YAML frontmatter):** If no `**Parent:**` bullet is found, look for a metadata block between `---` delimiters and parse `parent_card`, `parent_slug`, `parent_checklist_name`, `parent_item_number` as key-value pairs.
 
 **Last-resort fallback:** Extract `[slug.NN]` from the child card title using `/^\[(?<slug>[a-z0-9-]+)\.(?<nn>\d{2,})\]/`. Search the description for a trello.com URL as the parent reference. Use "Steps" as default checklist name.
 
