@@ -67,7 +67,7 @@ For each card in the output whose title matches `/^\[[a-z0-9-]+\.\d{2,}\]/` (chi
 bin/trello card show <card-ref>
 ```
 
-Check the description for `requires_migrations: true`. If found, migrations are **locked** — note which card holds the lock.
+Check the description for the lineage bullet `**Migrations:** yes`. An older card carries `requires_migrations: true` instead. Either one means migrations are **locked** — note which card holds the lock.
 
 **Optimization:** Skip the `card show` calls if no unchecked item has `{migrations}`. Also, only inspect cards matching the child title pattern.
 
