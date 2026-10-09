@@ -7,7 +7,7 @@ description: Use when user says "fix #123", "work on card xyz", "tackle that bug
 
 ## Overview
 
-Fetch a Trello card, download its attachments, move it to In Progress, and trigger the appropriate workflow based on card type.
+Fetch a Trello card, download its attachments, check the In Progress cap, move it to In Progress, and trigger the appropriate workflow based on card type.
 
 ## The Process
 
@@ -48,13 +48,27 @@ Then:
 - **Stack traces** → Read content
 - **Other files** → Note location for reference
 
-### Phase 4: Move to In Progress
+### Phase 4: Check the In Progress Cap
+
+Skip this phase when the card already sits in In Progress. A resumed session keeps its card.
+
+Look for a cap on In Progress in the project's Trello conventions. AGENTS.md or CLAUDE.md names the conventions file. Skip this phase when the conventions set no cap.
+
+Count the cards the cap counts, with the command the conventions give. A cap that leaves out unattended work excludes that work's label:
+
+```bash
+bin/trello list cards "In Progress" --without-label easy
+```
+
+At the cap, STOP and move nothing. Name the cards that fill the cap. Say that one must land or leave In Progress first.
+
+### Phase 5: Move to In Progress
 
 ```bash
 bin/trello card move <ref> "In Progress"
 ```
 
-### Phase 5: Trigger Downstream Skill
+### Phase 6: Trigger Downstream Skill
 
 **Check labels and route:**
 
@@ -74,6 +88,7 @@ bin/trello card move <ref> "In Progress"
 If you catch yourself doing these, STOP:
 
 - **Starting work without moving to In Progress** - Always move first
+- **Moving a card in at the cap** - Count In Progress before the move
 - **Skipping attachments** - They contain key context
 - **Guessing the skill** - Check the label
 - **Summarizing for downstream** - Let the skill read the full context
@@ -86,5 +101,6 @@ If you catch yourself doing these, STOP:
 | 1. Parse | (natural language) | Extract card reference |
 | 2. Fetch | `bin/trello card show` | Get card details |
 | 3. Download | `bin/trello attach get` | Get all attachments |
-| 4. Move | `bin/trello card move` | Mark as In Progress |
-| 5. Route | Check labels | Trigger debugging or brainstorming |
+| 4. Cap | `bin/trello list cards` | Refuse at the In Progress cap |
+| 5. Move | `bin/trello card move` | Mark as In Progress |
+| 6. Route | Check labels | Trigger debugging or brainstorming |
