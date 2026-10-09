@@ -7,7 +7,7 @@ description: Use when user says "start next checklist item", "grab the next item
 
 ## Overview
 
-Find the next ready checklist item on a parent card, create a child card for it, move it to In Progress, and link it back to the parent checklist. Respects dependency ordering and migration locking.
+Find the next ready checklist item on a parent card, check the In Progress cap, create a child card for it, move it to In Progress, and link it back to the parent checklist. Respects dependency ordering and migration locking.
 
 ## Conventions
 
@@ -29,7 +29,7 @@ bin/trello card show <parent-ref>
 Extract slug from title — must match `/^\[(?<slug>[a-z0-9-]+)\]/`.
 If no slug found, STOP and tell the user to add a `[slug]` prefix to the card title.
 
-Extract labels from the `Labels:` line in the card show output (case-insensitive match). Save these for Phase 6:
+Extract labels from the `Labels:` line in the card show output (case-insensitive match). Save these for Phase 7:
 
 - **Kind:** the one label out of `bug`, `feature`, `chore`. If the parent has none of them, or more than one, STOP and ask which kind the children take.
 - **Origin:** `user`, if present.
@@ -97,7 +97,21 @@ No ready items. Blocked:
 
 Keep it short — one line per blocked item.
 
-### Phase 6: Create Child Card
+### Phase 6: Check the In Progress Cap
+
+The child goes straight into In Progress, so it counts against any cap there.
+
+Look for a cap on In Progress in the project's Trello conventions. AGENTS.md or CLAUDE.md names the conventions file. Skip this phase when the conventions set no cap.
+
+Count the cards the cap counts, with the command the conventions give. A cap that leaves out unattended work excludes that work's label:
+
+```bash
+bin/trello list cards "In Progress" --without-label easy
+```
+
+At the cap, STOP and create nothing. Name the cards that fill the cap and the item that is ready. Say that one card must land or leave In Progress first.
+
+### Phase 7: Create Child Card
 
 Create the child with the command for the parent's kind: `bin/trello chore new`, `feature new` or `bug new`. These commands require the kind's sections and enforce its word cap. Never use `card new`, which skips both.
 
@@ -141,7 +155,7 @@ If the command rejects the input as over the word cap, do not reword to fit. The
 
 No need to `card move` separately — `--list "In Progress"` creates it there directly.
 
-### Phase 7: Update Parent Checklist Item
+### Phase 8: Update Parent Checklist Item
 
 Wrap the description text in a Markdown link to the child card. The `[slug.NN]` prefix and any `{...}` tags stay unchanged — only the description becomes a link.
 
@@ -156,7 +170,7 @@ bin/trello checklist item-edit <parent-ref> "Steps" "<exact current item text>" 
 
 **Old format items:** If the item uses old `NN. title` format, convert it to the new format at the same time: `[slug.NN] [title](url) {tags}`.
 
-### Phase 8: Confirm
+### Phase 9: Confirm
 
 Output:
 - Child card URL
@@ -179,6 +193,7 @@ If you catch yourself doing these, STOP:
 - **Creating a duplicate child** — If item already has a Markdown link or trello URL, skip it
 - **Ignoring deps** — Always verify dep items are checked
 - **Ignoring migration lock** — Always check if `{migrations}` items need the lock scan
+- **Creating a child at the cap** — Count In Progress before creating the child
 - **Guessing list names** — Use exact names: "In Progress", "Pull Request", "Done/Committed"
 - **Using position numbers for item-edit** — Use exact item text as the ITEM argument
 - **Appending URL instead of linking** — Wrap the description in `[text](url)`, do NOT append `→ url` or bare URLs
@@ -195,6 +210,7 @@ If you catch yourself doing these, STOP:
 | 3. Migration | `bin/trello list cards` + `card show` | Check lock |
 | 4. Ready | (logic) | Filter to actionable items |
 | 5. Pick | (logic) | Smallest NN or blocked report |
-| 6. Create | `bin/trello <kind> new --list "In Progress"` | Child card, lineage in Notes |
-| 7. Link | `bin/trello checklist item-edit` | Wrap description as Markdown link |
-| 8. Confirm | (output) | URL + one sentence |
+| 6. Cap | `bin/trello list cards` | Refuse at the In Progress cap |
+| 7. Create | `bin/trello <kind> new --list "In Progress"` | Child card, lineage in Notes |
+| 8. Link | `bin/trello checklist item-edit` | Wrap description as Markdown link |
+| 9. Confirm | (output) | URL + one sentence |
